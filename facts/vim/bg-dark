@@ -1,0 +1,2 @@
+The default vim colouring in most terminals leaves comments nearly impossible to read.
+Add `set bg=dark` to `~/.vimrc` on your system for beautiful, easy to read colouring :rainbow:

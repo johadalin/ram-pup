@@ -1,0 +1,2 @@
+Want to run a single command mode command without dropping out of insert mode?
+Use `ctrl + o`, and then your command. It will run the command while leaving you in insert mode
