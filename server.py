@@ -90,6 +90,7 @@ class FactHandler(tornado.web.RequestHandler):
             if url_params['text'][0] in self.facts.keys():
                 try:
                     self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
+                    self.write("_({} facts in this set)_".format(len(self.facts[url_params['text'][0]])))
                 except IndexError:
                     self.write("No facts have been submitted to this fact pack yet. :sadparrot:")
             else:
