@@ -93,7 +93,7 @@ class FactHandler(tornado.web.RequestHandler):
                 except IndexError:
                     self.write("No facts have been submitted to this fact pack yet. :sadparrot:")
             else:
-                self.write("No fact pack found for {}. Soon you will be able to contribute facts through git.".format(url_params['text'][0]))
+                self.write("No fact pack found for {}. Consider contributing at https://github.com/johadalin/ram-pup".format(url_params['text'][0]))
         else:
             self.write("Current fact packs available are: {}".format([key for key in self.facts.keys()]))
 
