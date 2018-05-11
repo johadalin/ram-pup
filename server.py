@@ -57,8 +57,11 @@ class FactHandler(tornado.web.RequestHandler):
         mypath = '/home/ubuntu/ram-pup/facts'
         files = {}
         for directory in os.listdir(mypath):
+            logger.debug("Getting files for dir {}".format(directory))
             dirpath = mypath + "/" + directory
             files[directory] = [join(dirpath, f) for f in listdir(dirpath) if isfile(join(dirpath, f))]
+            logger.debug("Got files {} for dir {}".format(files[directory], directory))
+
         logger.info("We have the files {}".format(files))
 
         facts_dict = {}
