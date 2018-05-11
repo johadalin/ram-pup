@@ -50,6 +50,7 @@ class FactHandler(tornado.web.RequestHandler):
         self.facts = self.get_facts()
 
     def get_facts(self):
+        logger.info("Generating list of facts from disk")
         mypath = '/home/ubuntu/ram-pup/facts'
         files = {}
         for directory in os.listdir(mypath):
@@ -77,16 +78,20 @@ class FactHandler(tornado.web.RequestHandler):
         logger.debug("parsed out args \n {} \n \n ".format(url_params))
 
         if 'text' in url_params.keys():
+            logger.info("Request is asking for facts on {}".format(url_params['text'][0]))
             if url_params['text'][0] in self.facts.keys():
-                self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
+                try:
+                    self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
+                except IndexError:
+                    self.write("No facts have been submitted to this fact pack yet. :sadparrot:")
             else:
-                self.write("No fact pack found for {}. Please contribute at...".format(url_params['text'][0]))
+                self.write("No fact pack found for {}. Soon you will be able to contribute facts through git.".format(url_params['text'][0]))
         else:
             self.write("Current fact packs available are: {}".format([key for key in self.facts.keys()]))
 
 def shutdown(sig, frame):
     """Stop the process."""
-    logging.warning("Shutting down")
+    logger.info("Shutting down")
     tornado.ioloop.IOLoop.current().stop()
 
 
