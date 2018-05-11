@@ -12,6 +12,8 @@ import os
 import sys
 import logging
 
+COUNTER = 0
+
 logger = logging.getLogger(__name__)
 def setup_logging(logdir='log'):
     logger = logging.getLogger()
@@ -72,13 +74,19 @@ class FactHandler(tornado.web.RequestHandler):
         return facts_dict
 
     def get(self, *args, **kwargs):
-        logger.info("Incoming request {}".format(self.request.uri))
+        global COUNTER
+        COUNTER += 1
+        logger.debug("Incoming request {}".format(self.request.uri))
+        logger.info("Request count {}".format(COUNTER))
 
         url_params = parse_qs(self.request.uri)
         logger.debug("parsed out args \n {} \n \n ".format(url_params))
 
         if 'text' in url_params.keys():
             logger.info("Request is asking for facts on {}".format(url_params['text'][0]))
+            if url_params['text'][0] == "count":
+                self.write("{} requests have been served since this server last catasrophilcally failed/was restarted".format(COUNTER))
+                return
             if url_params['text'][0] in self.facts.keys():
                 try:
                     self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
