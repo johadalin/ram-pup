@@ -1,0 +1,4 @@
+Use vim macros to record a set of commands/steps that can then be easily repeated.
+Hit `q + <letter to save macro to>` to begin recording, perform the actions you want to save, and then `q` again in command mode to stop recording. 
+Run your macro using `@ + <macro binding letter>`.
+(This can be really powerful, but a bit fiddly to get going)
