@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
+from os import listdir
+from os.path import isfile, join
 import tornado.web
 import tornado.ioloop
+import random
 import signal
 import time
 import os
@@ -46,29 +49,56 @@ def setup_logging(logdir='log'):
 class FactHandler(tornado.web.RequestHandler):
     """ catch gets, get facts"""
     def initialize(self):
-        facts = get_facts()
+        self.facts = self.get_facts()
 
-    def get_facts():
-        facts = {"test card": "test stuff here"}
+    def get_facts(self):
+        mypath = '/home/ubuntu/ram-pup/facts'
+        files = {}
+        for directory in os.listdir(mypath):
+            dirpath = mypath + "/" + directory
+            files[directory] = [join(dirpath, f) for f in listdir(dirpath) if isfile(join(dirpath, f))]
+        logger.info("We have the files {}".format(files))
+
+        facts_dict = {}
+        for category, facts in files.items():
+            fact_text = []
+            for fact in facts:
+                with open(fact, 'r') as f:
+                    fact_text.append(f.read())
+            facts_dict[category] = fact_text
+        logger.info("We have the fact contents {}".format(facts_dict))
+        # do stuff
+        #vim_facts = ["test stuff here", " fact 2"]
+        #other_facts = ["other stuff", " stuff 2"]
+        #facts = {"vim": vim_facts, "other": other_facts}
+        return facts_dict
 
     def get(self):
         logger.info("Get request {}".format(self.request.body))
+        self.write("{}".format(self.facts))
+
+    def get(self, *args, **kwargs):
+        logger.info("Get request {} with args {} and kwargs {}".format(self.request.body, args, kwargs))
+        if args[0] in self.facts.keys():
+            self.write("{}".format(random.choice(self.facts[args[0]])))
+        else:
+            self.write("No fact pack found for {}. Please contribute at...".format(args[0]))
 
 
-def on_shutdown(sig, frame):
-    """Schedules the RPE process to shut down when signal sig is received."""
-    logging.warning("Received signal %s, schedule shutdown", sig)
-    tornado.ioloop.IOLoop.current().add_callback(shutdown)
+def shutdown(sig, frame):
+    """Stop the process."""
+    logging.warning("Shutting down")
+    tornado.ioloop.IOLoop.current().stop()
 
 
 def main():
     setup_logging()
-    fact_app = tornado.web.Application([("/facts", FactHandler), ])
+    fact_app = tornado.web.Application([("/facts/(.*)", FactHandler), ])
     LISTEN_PORT = 8080
     fact_app.listen(LISTEN_PORT, address='127.0.0.1')
     logger.info("Listening on port %d", LISTEN_PORT)
 
-    signal.signal(signal.SIGINT, on_shutdown)
+    signal.signal(signal.SIGINT, shutdown)
 
     tornado.ioloop.IOLoop.current().start()
 
