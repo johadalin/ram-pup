@@ -38,9 +38,6 @@ def setup_logging(logdir='log'):
         # log or not.
         logger.setLevel(logging.DEBUG)
         file_handler.setLevel(logging.DEBUG)
-        #if verbose:
-        #    stdout_handler.setLevel(logging.DEBUG)
-        #else:
         stdout_handler.setLevel(logging.INFO)
 
         logger.addHandler(stdout_handler)
@@ -48,7 +45,7 @@ def setup_logging(logdir='log'):
 
 
 class FactHandler(tornado.web.RequestHandler):
-    """ catch gets, get facts"""
+    """catch gets, get facts"""
     def initialize(self):
         self.facts = self.get_facts()
 
@@ -61,7 +58,7 @@ class FactHandler(tornado.web.RequestHandler):
             files[directory] = [join(dirpath, f) for f in listdir(dirpath) if isfile(join(dirpath, f))]
             logger.debug("Got files {} for dir {}".format(files[directory], directory))
 
-        logger.info("We have the files {}".format(files))
+        logger.debug("We have the files {}".format(files))
 
         facts_dict = {}
         for category, facts in files.items():
@@ -70,22 +67,22 @@ class FactHandler(tornado.web.RequestHandler):
                 with open(fact, 'r') as f:
                     fact_text.append(f.read())
             facts_dict[category] = fact_text
-        logger.info("We have the fact contents {}".format(facts_dict))
+        logger.debug("We have the fact contents {}".format(facts_dict))
         return facts_dict
 
     def get(self, *args, **kwargs):
-        logger.info("{}".format(self.request.uri))
+        logger.info("Incoming request {}".format(self.request.uri))
 
         url_params = parse_qs(self.request.uri)
-        logger.info("parsed out args \n {} \n \n ".format(url_params))
-        logger.info("full request object is \n\n{}\n\n".format(self.request))
-        logger.info("Get request {} with args {} and kwargs {}".format(self.request.body, args, kwargs))
+        logger.debug("parsed out args \n {} \n \n ".format(url_params))
 
-        if url_params['text'][0] in self.facts.keys():
-            self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
+        if 'text' in url_params.keys():
+            if url_params['text'][0] in self.facts.keys():
+                self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
+            else:
+                self.write("No fact pack found for {}. Please contribute at...".format(url_params['text'][0]))
         else:
-            self.write("No fact pack found for {}. Please contribute at...".format(url_params['text'][0]))
-
+            self.write("Current fact packs available are: {}".format([key for key in self.facts.keys()]))
 
 def shutdown(sig, frame):
     """Stop the process."""
