@@ -88,7 +88,7 @@ def shutdown(sig, frame):
 def main():
     setup_logging()
     fact_app = tornado.web.Application([("/facts/(.*)", FactHandler), ])
-    LISTEN_PORT = 8080
+    LISTEN_PORT = 8081
     fact_app.listen(LISTEN_PORT, address='0.0.0.0')
     logger.info("Listening on port %d", LISTEN_PORT)
 
