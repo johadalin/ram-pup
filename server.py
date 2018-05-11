@@ -2,6 +2,7 @@
 
 from os import listdir
 from os.path import isfile, join
+from urllib.parse import parse_qs
 import tornado.web
 import tornado.ioloop
 import random
@@ -52,8 +53,6 @@ class FactHandler(tornado.web.RequestHandler):
         self.facts = self.get_facts()
 
     def get_facts(self):
-        logger.info("{}".format(self.request.uri))
-        logger.info("full request object is \n\n{}\n\n".format(self.request))
         mypath = '/home/ubuntu/ram-pup/facts'
         files = {}
         for directory in os.listdir(mypath):
@@ -75,11 +74,17 @@ class FactHandler(tornado.web.RequestHandler):
         return facts_dict
 
     def get(self, *args, **kwargs):
+        logger.info("{}".format(self.request.uri))
+
+        url_params = parse_qs(self.request.uri)
+        logger.info("parsed out args \n {} \n \n ".format(url_params))
+        logger.info("full request object is \n\n{}\n\n".format(self.request))
         logger.info("Get request {} with args {} and kwargs {}".format(self.request.body, args, kwargs))
-        if args[0] in self.facts.keys():
-            self.write("{}".format(random.choice(self.facts[args[0]])))
+
+        if url_params['text'][0] in self.facts.keys():
+            self.write("{}".format(random.choice(self.facts[url_params['text'][0]])))
         else:
-            self.write("No fact pack found for {}. Please contribute at...".format(args[0]))
+            self.write("No fact pack found for {}. Please contribute at...".format(url_params['text'][0]))
 
 
 def shutdown(sig, frame):
