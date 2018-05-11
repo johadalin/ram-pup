@@ -52,6 +52,8 @@ class FactHandler(tornado.web.RequestHandler):
         self.facts = self.get_facts()
 
     def get_facts(self):
+        logger.info("{}".format(self.request.uri))
+        logger.info("full request object is \n\n{}\n\n".format(self.request))
         mypath = '/home/ubuntu/ram-pup/facts'
         files = {}
         for directory in os.listdir(mypath):
@@ -67,15 +69,7 @@ class FactHandler(tornado.web.RequestHandler):
                     fact_text.append(f.read())
             facts_dict[category] = fact_text
         logger.info("We have the fact contents {}".format(facts_dict))
-        # do stuff
-        #vim_facts = ["test stuff here", " fact 2"]
-        #other_facts = ["other stuff", " stuff 2"]
-        #facts = {"vim": vim_facts, "other": other_facts}
         return facts_dict
-
-    def get(self):
-        logger.info("Get request {}".format(self.request.body))
-        self.write("{}".format(self.facts))
 
     def get(self, *args, **kwargs):
         logger.info("Get request {} with args {} and kwargs {}".format(self.request.body, args, kwargs))
@@ -95,7 +89,7 @@ def main():
     setup_logging()
     fact_app = tornado.web.Application([("/facts/(.*)", FactHandler), ])
     LISTEN_PORT = 8080
-    fact_app.listen(LISTEN_PORT, address='127.0.0.1')
+    fact_app.listen(LISTEN_PORT, address='0.0.0.0')
     logger.info("Listening on port %d", LISTEN_PORT)
 
     signal.signal(signal.SIGINT, shutdown)
